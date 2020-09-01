@@ -28,8 +28,9 @@ jobs:
       # Runs a single command using the runners shell
       - name: lint
         run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.
-          sh | sh -s -- -b $(go env GOPATH)/bin v1.26.0
+          curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+          
           
           golangci-lint run
       
