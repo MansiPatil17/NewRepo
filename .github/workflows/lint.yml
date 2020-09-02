@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Lint Go Code
+name: Go Code
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -20,18 +20,40 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
         with:
           stable : 'false'
           g-version: '1.14.1'
 
       # Runs a single command using the runners shell
-      - name: lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.
-          sh | sh -s -- -b $(go env GOPATH)/bin v1.26.0
-        
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
           
-          golangci-lint run
-      
+      - name: Install Dependencies
+        run: npm install   
+        jobs:
+          test:
+          name: Test on node ${{ matrix.node_version }} and ${{ matrix.os }}
+          runs-on: ${{ matrix.os }}
+          strategy:
+           matrix:
+             node_version: ['8', '10', '12']
+             os: [ubuntu-latest, windows-latest, macOS-latest]
+
+          steps:
+           - uses: actions/checkout@v1
+           - name: Use Node.js ${{ matrix.node_version }}
+             uses: actions/setup-node@v1
+             with:
+               node-version: ${{ matrix.node_version }}
+
+           - name: npm install, build and test
+             run: | 
+                  npm install
+                  npm run build --if-present
+                  npm test
           
+       # steps:
+                 #- run: npm publish
+                  # if: github.event == 'push'
